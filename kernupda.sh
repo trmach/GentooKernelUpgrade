@@ -33,13 +33,14 @@ else
 
 	if mount | grep "/boot"; then
 		echo "Boot partition mounted..."
-		if [[ -e /boot/grub/grub.cfg ]]; then
-			echo "GRUB configuration file found!"
-		#	GRUBDIR="/boot/grub"
-		else
-			echo "Please enter the directory containing 'grub.cfg' >>> "
-			read GRUBDIR
-		fi
+	else
+		echo "I'm going to tell you a secret, keep it between us, alright?"
+		echo "Them, they do it on purpose, to tease newcomers. First they instruct"
+		echo "you to create a separate boot partition, then they tell you not to"
+		echo "automount it in fstab, and then they laugh on us when we forget to"
+		echo "mount boot before installing a new kernel! Yup, with boot not mounted"
+		echo "you can install kernels as many as you want, when you reboot it will"
+		echo "still be the old kernel you installed with Gentoo."
 	fi
 
 	make modules_prepare
