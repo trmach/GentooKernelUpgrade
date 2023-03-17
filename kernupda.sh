@@ -22,7 +22,7 @@ else
 	cp /usr/src/linux-$(uname -r)/.config . # copy config
 
 	echo -n "Would you like to edit the configuration in menuconfig? [y/n] >>> "
-	read -n 1 CH
+	read CH
 	if [[ ${CH,,} == "n" ]]; then
 		echo
 		make olddefconfig
