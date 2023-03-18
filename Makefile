@@ -1,5 +1,9 @@
 CC = gcc
-CFLAGS = `pkg-config --libs --cflags gtk+-3.0`
+PKGS = gtk+-3.0
+LIBS = `pkg-config --libs $(PKGS)`
+CFLAGS = `pkg-config --cflags $(PKGS)` -Wall -Wextra -pedantic
+SRC = gku.c
+
 
 all: gku.c
-	gcc -o gku $(CFLAGS) gku.c
+	$(CC) -o gku $(CFLAGS) $(LIBS) $(SRC)
