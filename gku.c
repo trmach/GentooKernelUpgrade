@@ -5,35 +5,39 @@
 
 #define ENTRY_BUFFER 100
 
-void read_entries() {
+static int insert_entries(GtkWidget * list_box) {       //* Accept the list box where we insert our list of targets
 
-  FILE * fp; //* Read command output to file
-  char * entry_buf[ENTRY_BUFFER];    //* buffer for our entries
+  FILE * fp;                                            //* Read command output to file
+  char entry_buf[ENTRY_BUFFER];                         //* buffer for our entries
+  int num_targets = 0;
 
-  fp = popen("/usr/bin/eselect kernel list", "r"); //* Execute command and read
-  if (fp == NULL) {                                //* Check that execution was successful
-    fprintf(stderr, "Failed to run command.\n");   //* If not, error and exit.
+  fp = popen("/usr/bin/eselect kernel list", "r");      //* Execute command and read
+  if (fp == NULL) {                                     //* Check that execution was successful
+    fprintf(stderr, "Failed to run command.\n");        //* If not, error and exit.
     exit(1);
   }
 
-  while(fgets(entry_buf, sizeof(entry_buf), fp) != NULL) {           //* AvAiLaBlE kErNeL sYmLiNk TaRgEtS:
-    printf("%s", entry_buf);
+  fgets(entry_buf, sizeof(entry_buf), fp); //* AvAiLaBlE kErNeL sYmLiNk TaRgEtS:
+
+  while(fgets(entry_buf, sizeof(entry_buf), fp) != NULL) {           //* I can't believe this actually works
+    GtkWidget * symlinkTarget = gtk_label_new(entry_buf);
+    gtk_list_box_insert(list_box, symlinkTarget, num_targets);
+    num_targets++;
   }
   
-  if (entry_buf == NULL) {
-    fclose(fp);
-  }
+  fclose(fp);
+
+  return 0;
 
 }
 
-static void update_button(GtkWidget *button, gpointer data) {
+static void update_button(GtkButton *button, gpointer data) {
 
   char * buf = malloc(100 * sizeof(char));
   static int n = 0;
   n++;
   sprintf(buf, "%d", n);
   gtk_button_set_label(button, buf);
-  read_entries();
   free(buf);
 
 }
@@ -42,8 +46,9 @@ static int activate(GtkApplication* app, gpointer user_data) {
 
   GtkWidget *window, 
     *box,
-    *number_button, *cancel_button, 
-    *radio1, *radio2;
+    *list_box,
+    *number_button, *cancel_button;
+    //*radio1, *radio2, *radio3
   
   //* Open Window and set properties
   window = gtk_application_window_new(app);
@@ -65,18 +70,27 @@ static int activate(GtkApplication* app, gpointer user_data) {
   g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK (gtk_widget_destroy), window);
 
   //* Radio buttons
-  radio1 = gtk_radio_button_new(NULL);
-  GtkWidget * entry = gtk_entry_new();
-  gtk_container_add(GTK_CONTAINER (radio1), entry);
+  // radio1 = gtk_radio_button_new(NULL);
+  // GtkWidget * entry = gtk_entry_new();
+  // gtk_container_add(GTK_CONTAINER (radio1), entry);
 
-  radio2 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON (radio1), "Second button");
+  // radio2 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON (radio1), "Second button");
+  // radio3 = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON (radio1), "Third Button");
+
+  //* Here we want to create a list box with gtk_list_box_new()
+  //* We want to add the list of kernel symlink targets as they are read in another function with gtk_list_box_insert()
+  //* Finally determine the target number with gtk_list_box_get_selected_row(), perhaps triggered by a button press.
+  list_box = gtk_list_box_new();
+  insert_entries(list_box);
 
   //* Add buttons to container. It looks like hell.
+    // gtk_box_pack_start(GTK_BOX (box), radio1, true, true, 2);
+  // gtk_box_pack_start(GTK_BOX (box), radio2, true, true, 2);
+  // gtk_box_pack_start(GTK_BOX (box), radio3, true, true, 2);
+  gtk_box_pack_start(GTK_BOX (box), list_box, true, true, 2);
   gtk_box_pack_start(GTK_BOX (box), number_button, true, true, 9);
   gtk_box_pack_start(GTK_BOX (box), cancel_button, true, true, 9);
-  gtk_box_pack_start(GTK_BOX (box), radio1, true, true, 2);
-  gtk_box_pack_start(GTK_BOX (box), radio2, true, true, 2);
-  //gtk_container_add(GTK_CONTAINER (box), radio_button);
+
   //gtk_container_add(GTK_CONTAINER (window), box);
 
   gtk_widget_show_all(window);
