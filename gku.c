@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <gtk-3.0/gtk/gtk.h>
 
-#define ENTRY_BUFFER 100
+#define ENTRY_BUFFER 50
 
 static int insert_entries(GtkWidget * list_box) {       //* Accept the list box where we insert our list of targets
 
@@ -31,9 +31,9 @@ static int insert_entries(GtkWidget * list_box) {       //* Accept the list box 
 
 }
 
-static void update_button(GtkButton *button, gpointer data) {
+static void update_button(GtkButton *button) {
 
-  char * buf = malloc(100 * sizeof(char));
+  char * buf = malloc(12 * sizeof(char));
   static int n = 0;
   n++;
   sprintf(buf, "%d", n);
@@ -42,13 +42,20 @@ static void update_button(GtkButton *button, gpointer data) {
 
 }
 
+static int get_target_index(GtkListBox *list_box) {
+  int i = gtk_list_box_row_get_index(gtk_list_box_get_selected_row(list_box)) + 1;
+  printf("Selected Row: %d\n", i);
+  return i;
+}
+
 static int activate(GtkApplication* app, gpointer user_data) {
 
   GtkWidget *window, 
     *box,
-    *list_box,
-    *number_button, *cancel_button;
+    *number_button, *select_button, *cancel_button;
     //*radio1, *radio2, *radio3
+  
+  GtkListBox *list_box;
   
   //* Open Window and set properties
   window = gtk_application_window_new(app);
@@ -61,6 +68,9 @@ static int activate(GtkApplication* app, gpointer user_data) {
 
   gtk_container_add(GTK_CONTAINER (window), box);
 
+  list_box = gtk_list_box_new();
+  insert_entries(list_box);
+
   //* Button that does something fun
   number_button = gtk_button_new_with_label("0");
   g_signal_connect(number_button, "clicked", (G_CALLBACK (update_button)), NULL);
@@ -68,6 +78,9 @@ static int activate(GtkApplication* app, gpointer user_data) {
   //* Button that closes the window
   cancel_button = gtk_button_new_with_label("Exit");
   g_signal_connect_swapped(cancel_button, "clicked", G_CALLBACK (gtk_widget_destroy), window);
+
+  select_button = gtk_button_new_with_label("Select");
+  g_signal_connect_swapped(select_button, "clicked", (G_CALLBACK (get_target_index)), list_box);
 
   //* Radio buttons
   // radio1 = gtk_radio_button_new(NULL);
@@ -80,8 +93,9 @@ static int activate(GtkApplication* app, gpointer user_data) {
   //* Here we want to create a list box with gtk_list_box_new()
   //* We want to add the list of kernel symlink targets as they are read in another function with gtk_list_box_insert()
   //* Finally determine the target number with gtk_list_box_get_selected_row(), perhaps triggered by a button press.
-  list_box = gtk_list_box_new();
-  insert_entries(list_box);
+  
+
+  
 
   //* Add buttons to container. It looks like hell.
     // gtk_box_pack_start(GTK_BOX (box), radio1, true, true, 2);
@@ -89,7 +103,7 @@ static int activate(GtkApplication* app, gpointer user_data) {
   // gtk_box_pack_start(GTK_BOX (box), radio3, true, true, 2);
   gtk_box_pack_start(GTK_BOX (box), list_box, true, true, 2);
   gtk_box_pack_start(GTK_BOX (box), number_button, true, true, 9);
-  gtk_box_pack_start(GTK_BOX (box), cancel_button, true, true, 9);
+  gtk_box_pack_start(GTK_BOX (box), select_button, true, true, 9);
 
   //gtk_container_add(GTK_CONTAINER (window), box);
 
