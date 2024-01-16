@@ -47,7 +47,8 @@ else
 	
 	# add option to enable distributed compilation?
 
-	echo -n "Please enter the number of threads to allocate to compilation (default: `nproc`) >>> "
+	echo -n "Please enter the number of threads to allocate to compilation\
+    (default: `nproc`) >>> "
 	read THREADS
 	if [[ -n "$THREADS" ]]; then
 		echo "using ${THREADS} threads"
